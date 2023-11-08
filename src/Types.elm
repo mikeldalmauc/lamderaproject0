@@ -3,12 +3,14 @@ module Types exposing (..)
 import Browser exposing (UrlRequest)
 import Browser.Navigation exposing (Key)
 import Url exposing (Url)
+import Crate
 
 
 type alias FrontendModel =
     { key : Key
     , message : String
     , question : Question
+    , crate : Crate.Model
     }
 
 
@@ -24,6 +26,7 @@ type alias Question =
 type FrontendMsg
     = UrlClicked UrlRequest
     | UrlChanged Url
+    | CrateMsg Crate.Msg
     | NoOpFrontendMsg
 
 

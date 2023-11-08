@@ -1,5 +1,7 @@
 module Frontend exposing (..)
 
+import Crate exposing (..)
+
 import Browser exposing (UrlRequest(..))
 import Browser.Navigation as Nav
 import Html
@@ -27,24 +29,32 @@ app =
         , onUrlChange = UrlChanged
         , update = update
         , updateFromBackend = updateFromBackend
-        , subscriptions = \m -> Sub.none
+        , subscriptions = subscriptions
         , view = view
         }
+
+subscriptions : Model -> Sub FrontendMsg
+subscriptions model =
+    Sub.batch [Sub.map CrateMsg (Crate.subscriptions model.crate)]
 
 
 init : Url.Url -> Nav.Key -> ( Model, Cmd FrontendMsg )
 init url key =
-    ( { key = key
-      , message = "Welcome to Lamdera! You're looking at the auto-generated base implementation. Check out src/Frontend.elm to start coding!"
-      , question = {question = "Lorem ex magna incididunt aute exercitation occaecat deserunt excepteur ullamco elit.a", options = 
-        ["Consectetur in nulla proident dolore sunt veniam voluptate adipisicing id ullamco officia incididunt Lorem."
-        , "Fugiat incididunt deserunt esse aliqua et cupidatat et consequat ut mollit sunt."
-        , "Enim aliqua sit aliquip et occaecat minim cupidatat."
-        , "Adipisicing cupidatat labore amet nulla ea."]
-      }
-      }
-    , Cmd.none
-    )
+    let
+        (crateModel, crateMsg) = Crate.init  
+    in
+        ( 
+            { key = key
+            , message = "Welcome to Lamdera! You're looking at the auto-generated base implementation. Check out src/Frontend.elm to start coding!"
+            , question = {question = "Lorem ex magna incididunt aute exercitation occaecat deserunt excepteur ullamco elit.a", options = 
+                ["Consectetur in nulla proident dolore sunt veniam voluptate adipisicing id ullamco officia incididunt Lorem."
+                , "Fugiat incididunt deserunt esse aliqua et cupidatat et consequat ut mollit sunt."
+                , "Enim aliqua sit aliquip et occaecat minim cupidatat."
+                , "Adipisicing cupidatat labore amet nulla ea."]}
+            , crate = crateModel
+            }
+            , Cmd.map CrateMsg crateMsg
+        )
 
 
 update : FrontendMsg -> Model -> ( Model, Cmd FrontendMsg )
@@ -64,6 +74,12 @@ update msg model =
 
         UrlChanged url ->
             ( model, Cmd.none )
+
+        CrateMsg crateMsg -> 
+            let
+                (crateModel, crateCmd) = Crate.update crateMsg model.crate
+            in
+                ( { model | crate = crateModel }, Cmd.map CrateMsg crateCmd)
 
         NoOpFrontendMsg ->
             ( model, Cmd.none )
@@ -86,13 +102,19 @@ view model =
                     [ el [] Element.none
                     , column [width fill, centerY, spacing 30, Element.padding 40]
                         [
-                        viewQuestion model.question.question
+                          viewQuestion model.question.question
                         , viewOptions model.question.options
                         ]
+                    , viewCrate model.crate
                     , el [] Element.none
                     ]
         ]
     }
+
+viewCrate : Crate.Model -> Element FrontendMsg
+viewCrate model = 
+    Element.html <|  Html.map CrateMsg <| Crate.view model
+
 viewQuestion : String -> Element msg
 viewQuestion question = 
     el [] (text question)
