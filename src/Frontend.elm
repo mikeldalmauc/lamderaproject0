@@ -31,7 +31,6 @@ app =
         , updateFromBackend = updateFromBackend
         , subscriptions = subscriptions
         , view = view
-
         }
 
 subscriptions : Model -> Sub FrontendMsg
