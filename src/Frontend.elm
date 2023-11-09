@@ -31,7 +31,7 @@ app =
         , updateFromBackend = updateFromBackend
         , subscriptions = subscriptions
         , view = view
-        
+
         }
 
 subscriptions : Model -> Sub FrontendMsg
@@ -46,12 +46,6 @@ init url key =
     in
         ( 
             { key = key
-            , message = "Welcome to Lamdera! You're looking at the auto-generated base implementation. Check out src/Frontend.elm to start coding!"
-            , question = {question = "Lorem ex magna incididunt aute exercitation occaecat deserunt excepteur ullamco elit.a", options = 
-                ["Consectetur in nulla proident dolore sunt veniam voluptate adipisicing id ullamco officia incididunt Lorem."
-                , "Fugiat incididunt deserunt esse aliqua et cupidatat et consequat ut mollit sunt."
-                , "Enim aliqua sit aliquip et occaecat minim cupidatat."
-                , "Adipisicing cupidatat labore amet nulla ea."]}
             , crate = crateModel
             }
             , Cmd.map CrateMsg crateMsg
@@ -103,8 +97,6 @@ view model =
                     [ el [] Element.none
                     , column [width fill, centerY, spacing 30, Element.padding 40]
                         [
-                          viewQuestion model.question.question
-                        , viewOptions model.question.options
                         ]
                     , viewCrate model.crate
                     , el [] Element.none
@@ -115,18 +107,3 @@ view model =
 viewCrate : Crate.Model -> Element FrontendMsg
 viewCrate model = 
     Element.html <|  Html.map CrateMsg <| Crate.view model
-
-viewQuestion : String -> Element msg
-viewQuestion question = 
-    el [] (text question)
-
-
-viewOptions : List String -> Element msg
-viewOptions options = 
-    column
-        [width fill, centerY, spacing 30]
-        <| List.map2 
-            (\l op ->  el [ Border.rounded 3 , padding 30 ]  (text <| l ++ ") " ++ op)
-            ) 
-            ["a", "b", "c", "d"]
-            options

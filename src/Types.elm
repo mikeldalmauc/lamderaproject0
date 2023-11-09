@@ -8,19 +8,12 @@ import Crate
 
 type alias FrontendModel =
     { key : Key
-    , message : String
-    , question : Question
     , crate : Crate.Model
     }
 
 
 type alias BackendModel =
     { message : String
-    }
-
-type alias Question = 
-    { question : String
-    , options : List String
     }
 
 type FrontendMsg
