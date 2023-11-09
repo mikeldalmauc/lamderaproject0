@@ -2,19 +2,13 @@ module Evergreen.V1.Types exposing (..)
 
 import Browser
 import Browser.Navigation
+import Evergreen.V1.Crate
 import Url
-
-
-type alias Question =
-    { question : String
-    , options : List String
-    }
 
 
 type alias FrontendModel =
     { key : Browser.Navigation.Key
-    , message : String
-    , question : Question
+    , crate : Evergreen.V1.Crate.Model
     }
 
 
@@ -26,6 +20,7 @@ type alias BackendModel =
 type FrontendMsg
     = UrlClicked Browser.UrlRequest
     | UrlChanged Url.Url
+    | CrateMsg Evergreen.V1.Crate.Msg
     | NoOpFrontendMsg
 
 
