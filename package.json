@@ -1,0 +1,28 @@
+{
+  "name": "lamderaproject0",
+  "version": "1.0.0",
+  "description": "Game Boilerplate lab project",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mikeldalmauc/lamderaproject0.git"
+  },
+  "keywords": [
+    "lamdera",
+    "verge"
+  ],
+  "author": "Mikel Dalmau",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mikeldalmauc/lamderaproject0/issues"
+  },
+  "homepage": "https://github.com/mikeldalmauc/lamderaproject0#readme",
+  "dependencies": {
+    "verge3d": "^4.4.0",
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.4"
+  }
+}

@@ -41,7 +41,7 @@ update action model =
             ( { model | texture = Result.toMaybe textureResult }, Cmd.none )
 
         Animate dt ->
-            ( { model | theta = model.theta + dt / 10000 }, Cmd.none )
+            ( { model | theta = model.theta + dt / 20000 }, Cmd.none )
 
 
 init : ( Model, Cmd Msg )
@@ -63,8 +63,8 @@ view { texture, theta } =
         , WebGL.depth 1
         , WebGL.stencil 0
         ]
-        [ width 400
-        , height 400
+        [ width 1000
+        , height 1000
         , style "display" "block"
         ]
         (texture
@@ -89,6 +89,28 @@ scene camera texture =
         crateVertex
         crateFragment
         crateMesh
+        { texture = texture
+        , perspective = camera
+        }
+    , WebGL.entityWith
+        [ DepthTest.less
+            { write = False
+            , near = 0
+            , far = 1
+            }
+        , StencilTest.test
+            { ref = 1
+            , mask = 0xFF
+            , test = StencilTest.always
+            , fail = StencilTest.keep
+            , zfail = StencilTest.keep
+            , zpass = StencilTest.replace
+            , writeMask = 0xFF
+            }
+        ]
+        floorVertex
+        floorFragment
+        floorMesh
         { texture = texture
         , perspective = camera
         }
