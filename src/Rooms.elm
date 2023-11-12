@@ -1,10 +1,10 @@
 module Rooms exposing (..)
 
 import Dict exposing (Dict)
-import Nonaga as Game exposing (Player(..))
 import RoomId exposing (RoomId)
 import Set exposing (Set)
 
+import Nonaga as Game exposing (Player(..))
 
 type alias UserId =
     String
@@ -13,7 +13,6 @@ type alias UserId =
 type Room
     = WaitingForPlayers { id : RoomId, users : Set UserId }
     | Playing { id : RoomId, users : Dict UserId Player, gameModel : Game.Model }
-
 
 type Rooms
     = Rooms (Dict String Room)

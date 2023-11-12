@@ -7,11 +7,18 @@ import Crate
 import Gamepad.Advanced as GpadAdvanced exposing (Blob, UserMappings)
 import Gamepad.Private exposing (Origin)
 
+import Keyboard.Event exposing (KeyboardEvent, decodeKeyboardEvent)
+import Keyboard.Key as Key
+
 type alias FrontendModel =
     { key : Key
     , crate : Crate.Model
     , gamepadState : GamepadState
     , userMappings : UserMappings
+    , freq : Float
+    , delay : Float
+    , muted : Bool
+    , gain : Float
     }
 
 type GamepadState
@@ -35,6 +42,11 @@ type FrontendMsg
     | OnToggleRemap
     | NoOpFrontendMsg
 
+    | HandleKeyboardEvent KeyboardEvent
+
+    | ToggleAudio
+    | UpdateFreq Float
+    | UpdateGain Float
 
 type ToBackend
     = NoOpToBackend

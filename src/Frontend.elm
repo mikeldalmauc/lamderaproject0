@@ -11,17 +11,28 @@ import Html.Attributes as Attr
 import Lamdera
 import Types exposing (..)
 import Url 
+import Json.Encode
 
 -- Elm ui imports
 import Element exposing (Element, el, text, centerY)
 import Html.Attributes exposing (style)
 import Element exposing (centerX)
+import Element.Input as EInput
+import Element.Background as EBackground
 
 -- Gamepad
 import Gamepad exposing (Gamepad)
 import Gamepad.Advanced exposing (Blob, UserMappings)
 import Html.Events
 
+-- Keyboard
+import Keyboard.Event exposing (KeyboardEvent, decodeKeyboardEvent)
+import Keyboard.Key as Key
+
+-- Audio
+import WebAudio exposing (oscillator, delay, audioDestination)
+import WebAudio.Property exposing (frequency, delayTime )
+import String exposing (toFloat)
 
 
 type alias Model =
@@ -32,7 +43,19 @@ app =
         { init = init
         , onUrlRequest = UrlClicked
         , onUrlChange = UrlChanged
-        , update = update
+        , update =  
+            \msg model ->
+                let 
+                    ( mod, cmd ) = update msg model 
+                in
+                ( mod
+                , Cmd.batch 
+                    [ cmd
+                    , audio mod 
+                        |> Json.Encode.list WebAudio.encode
+                        |> ports.toWebAudio
+                    ]
+                ) 
         , updateFromBackend = updateFromBackend
         , subscriptions = subscriptions 
         , view = view
@@ -42,6 +65,7 @@ type alias PkgPorts ports msg =
     { ports | 
       saveToLocalStorage : String -> Cmd msg 
     , onBlob :  (Blob -> msg) -> Sub msg
+    , toWebAudio : Json.Encode.Value -> Cmd msg
     }
 
 
@@ -50,6 +74,7 @@ subscriptions model =
     Sub.batch 
         [ Sub.map CrateMsg (Crate.subscriptions model.crate)
         , gamePadSubscription model]
+
 
 gamePadSubscription : Model -> Sub FrontendMsg
 gamePadSubscription model =
@@ -71,6 +96,10 @@ init url key =
             , crate = crateModel
             , gamepadState = Initializing
             , userMappings = Gamepad.Advanced.emptyUserMappings
+            , delay = 0
+            , freq = 40
+            , gain = 0
+            , muted = True
             }
             , Cmd.map CrateMsg crateMsg
         )
@@ -127,6 +156,39 @@ update msg model =
                                 RemappingTool (Gamepad.Advanced.init controlsToMap)
                 }
 
+                  
+        HandleKeyboardEvent event ->
+            case event.keyCode of
+                Key.Right ->  
+                    noCmd model
+                Key.Left ->  
+                    noCmd model
+                Key.Up -> 
+                    noCmd model
+                Key.Down ->  
+                    noCmd model
+                Key.Z -> 
+                    noCmd model
+                Key.Spacebar -> 
+                    noCmd model
+                Key.C -> 
+                    noCmd model 
+                Key.Escape ->
+                    noCmd model 
+                Key.Enter ->
+                    noCmd model 
+                _ ->
+                    noCmd model 
+                            
+        ToggleAudio -> 
+            ({ model | muted = not model.muted }, Cmd.none)
+
+        UpdateFreq freq -> 
+            ({ model | freq = freq }, Cmd.none)
+        
+        UpdateGain gain -> 
+            ({ model | gain = gain }, Cmd.none)
+
         NoOpFrontendMsg ->
             ( model, Cmd.none )
 
@@ -148,6 +210,32 @@ view model =
             Element.layout [centerY, centerX]
             <|  viewCrate model.crate
         , gamepadTestView model
+        ,  Element.layout [centerY, centerX] 
+            <|  Element.column []
+                [ EInput.button
+                    [ EBackground.color <| Element.rgb255 238 238 238
+                    , Element.focused
+                        [ EBackground.color <| Element.rgb255 238 180 138 ]
+                    , Element.width <| Element.px 200
+                    ]
+                    { onPress = Just ToggleAudio
+                    , label = text "Toggle Audio"
+                    }
+                , EInput.text 
+                    []
+                    { onChange = \s -> UpdateFreq <| Maybe.withDefault 440 <| String.toFloat s
+                    , text = String.fromFloat model.freq
+                    , placeholder = Nothing
+                    , label = EInput.labelAbove [] <| text "oscilator frequency"
+                    }
+                 , EInput.text 
+                    []
+                    { onChange = \s -> UpdateGain <| Maybe.withDefault 0 <| String.toFloat s
+                    , text = String.fromFloat model.gain
+                    , placeholder = Nothing
+                    , label = EInput.labelAbove [] <| text "gain"
+                    }
+                ]
         ]
     }
 
@@ -400,3 +488,22 @@ gamepadTestView model =
                     ]
         ]
     
+
+-- Audio
+
+audio : Model -> List WebAudio.Node
+audio model =
+    if model.muted then 
+        []
+    else
+        [ WebAudio.oscillator 
+            [ WebAudio.Property.frequency model.freq ]
+            [ WebAudio.audioDestination
+            , WebAudio.gain
+                [ WebAudio.Property.gain model.gain]
+                [ WebAudio.audioDestination ]
+            , WebAudio.delay
+                [ WebAudio.Property.delayTime model.delay ]
+                [ WebAudio.audioDestination ]
+            ]
+        ]
